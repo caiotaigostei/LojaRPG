@@ -1,0 +1,51 @@
+create database Loja_RPG;
+use Loja_RPG;
+create table Cliente (
+id int auto_increment primary key,
+nome varchar(100) not null,
+idade smallint unsigned,
+sexo enum('M','F'),
+data_nascimento date);
+CREATE TABLE clientes_especiais (
+  cliente_id INT PRIMARY KEY,
+  cashback DECIMAL(10,2) DEFAULT 0.00,
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);
+
+create table Vendedor (
+id int auto_increment primary key,
+nome varchar(100) not null,
+causa_social varchar(100),
+nota_media decimal(3,1) default 0.00);
+
+create table Produtos (
+id int auto_increment primary key,
+nome varchar(100) not null,
+descricao text,
+quantidade_em_estoque int unsigned default 0,
+valor decimal(10,2),
+observacoes text,
+vendedor_id int,
+foreign key (vendedor_id) references Vendedor(id)
+);
+CREATE TABLE transportadoras (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(100) NOT NULL,
+  cidade VARCHAR(100)
+);
+create table Venda (
+id int auto_increment primary key,
+cliente_id int,
+transportadora_id int,
+data_hora datetime default now(),
+endereco_des varchar(100),
+valor_transp decimal(10,2) default 0.00,
+foreign key (cliente_id) references Cliente(id),
+foreign key (transportadora_id) references transportadoras(id));
+create table venda_produtos (
+venda_id int,
+produto_id int,
+quantidade int unsigned default 1,
+primary key(venda_id,produto_id),
+foreign key(venda_id) references Venda(id),
+foreign key(produto_id) references Produtos(id));
