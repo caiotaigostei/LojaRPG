@@ -4,7 +4,7 @@ create table Cliente (
 id int auto_increment primary key,
 nome varchar(100) not null,
 idade smallint unsigned,
-sexo enum('M','F'),
+sexo enum('M','F','O'),
 data_nascimento date);
 CREATE TABLE clientes_especiais (
   cliente_id INT PRIMARY KEY,
