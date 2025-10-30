@@ -49,4 +49,3 @@ def remover_transportadora(id):
         print("Transportadora não encontrada.")
     cursor.close()
     desconectar(conn)
-a
