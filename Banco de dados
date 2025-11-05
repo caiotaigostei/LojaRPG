@@ -1,11 +1,13 @@
 create database Loja_RPG;
 use Loja_RPG;
+
 create table Cliente (
 id int auto_increment primary key,
 nome varchar(100) not null,
 idade smallint unsigned,
 sexo enum('M','F','O'),
 data_nascimento date);
+
 CREATE TABLE clientes_especiais (
   cliente_id INT PRIMARY KEY,
   cashback DECIMAL(10,2) DEFAULT 0.00,
@@ -28,11 +30,13 @@ observacoes text,
 vendedor_id int,
 foreign key (vendedor_id) references Vendedor(id)
 );
+
 CREATE TABLE transportadoras (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   cidade VARCHAR(100)
 );
+
 create table Venda (
 id int auto_increment primary key,
 cliente_id int,
