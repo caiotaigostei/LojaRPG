@@ -59,3 +59,25 @@ CREATE TABLE venda_produtos (
   FOREIGN KEY(venda_id) REFERENCES Venda(id),
   FOREIGN KEY(produto_id) REFERENCES Produtos(id)
 );
+INSERT INTO Produtos (nome, descricao, quantidade_em_estoque, valor, observacoes, vendedor_id)
+VALUES
+('Conjunto de Dados Metálicos - Dragão Dourado', 'Kit com 7 dados metálicos temáticos de dragão, ideais para campanhas de fantasia.', 25, 149.90, 'Acompanha saquinho de veludo.', 1),
+('Livro de Regras - D&D 5ª Edição', 'Livro básico de regras do Dungeons & Dragons 5e, em português.', 40, 219.90, 'Edição oficial da Galápagos.', 2),
+('Escudo do Mestre - RPG Medieval', 'Escudo dobrável para mestres, com tabelas de referência e espaço para anotações.', 15, 89.90, 'Feito em MDF resistente.', 3),
+('Miniatura - Orc Guerreiro', 'Miniatura pintada à mão representando um orc com machado duplo.', 30, 59.90, 'Altura: 4 cm.', 1),
+('Kit de Dados Translúcidos - Névoa Etérea', 'Kit de dados em resina transparente com brilho prateado.', 50, 49.90, 'Conjunto com D4, D6, D8, D10, D12, D20.', 1),
+('Tapete de Combate - Grade 1x1', 'Mapa de batalha dobrável com grid 1x1 polegada para miniaturas.', 10, 119.90, 'Lavável e reutilizável.', 2),
+('Livro de Magias Avançadas', 'Suplemento com novas magias e regras alternativas para magos e feiticeiros.', 20, 159.90, 'Compatível com D&D 5e e sistemas similares.', 3),
+('Miniatura - Cavaleiro Sagrado', 'Miniatura em resina de um paladino em armadura completa.', 25, 64.90, 'Pintura premium.', 1),
+('Avental do Mestre - Edição Especial', 'Avental temático com bolsos para dados e canetas.', 12, 79.90, 'Tamanho único.', 2),
+('Mapa de Reinos - Edição Pôster', 'Mapa detalhado de um mundo fictício para campanhas de RPG.', 18, 39.90, 'Impressão em papel couchê A2.', 3),
+('Kit de Fichas Laminadas', 'Pacote com fichas plastificadas para reuso com caneta de quadro branco.', 35, 29.90, 'Compatível com vários sistemas.', 1),
+('Caixa de Dados - Madeira Entalhada', 'Caixa de armazenamento com entalhes de runas élficas.', 22, 99.90, 'Feita à mão.', 1),
+('Livro de Monstros - Tomo das Criaturas Abissais', 'Suplemento com mais de 100 criaturas inéditas.', 16, 189.90, 'Capa dura ilustrada.', 2),
+('Camisa - "Crítico Natural 20"', 'Camiseta temática com estampa de D20.', 40, 69.90, 'Tecido 100% algodão.', 3),
+('Miniatura - Dragão Vermelho Ancião', 'Miniatura de grande porte, ideal como chefe de campanha.', 8, 299.90, 'Altura: 12 cm.', 1),
+('Livro de Aventuras - O Segredo do Vale Sombrio', 'Campanha pronta para grupos de nível 1–10.', 25, 179.90, 'Contém mapas e NPCs detalhados.', 2),
+('Bolsa de Dados - Couro Sintético', 'Bolsa resistente com cordão para até 50 dados.', 45, 34.90, 'Cor: marrom escuro.', 3),
+('Kit Iniciante de RPG', 'Pacote contendo dados, ficha, regras resumidas e miniatura básica.', 30, 99.90, 'Ideal para novos jogadores.', 1),
+('Lápis do Aventureiro + Borracha de Poção', 'Kit de escrita temática para jogadores.', 60, 19.90, 'Design exclusivo.', 2),
+('Caderno do Mestre - Anotações de Campanha', 'Caderno com divisórias para NPCs, locais e eventos.', 28, 54.90, 'Capa dura e papel reciclado.', 3);
