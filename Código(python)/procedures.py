@@ -5,33 +5,44 @@ def criar_procedures_e_triggers():
     cursor = conn.cursor()
     cursor.execute("USE Loja_RPG;")
 
-    # Procedure: aplicar cashback para clientes especiais
+    # --- PROCEDURE: aplicar cashback para clientes especiais ---
+    cursor.execute("DROP PROCEDURE IF EXISTS aplicar_cashback;")
     cursor.execute("""
-    CREATE PROCEDURE IF NOT EXISTS aplicar_cashback(IN cliente_id INT, IN valor_compra DECIMAL(10,2))
+    CREATE PROCEDURE aplicar_cashback(IN p_cliente_id INT, IN p_valor_compra DECIMAL(10,2))
     BEGIN
-        DECLARE cashback_valor DECIMAL(10,2);
-        SELECT cashback INTO cashback_valor FROM clientes_especiais WHERE cliente_id = cliente_id;
-        IF cashback_valor IS NOT NULL THEN
+        DECLARE v_cashback DECIMAL(10,2);
+
+        SELECT cashback INTO v_cashback
+        FROM clientes_especiais
+        WHERE cliente_id = p_cliente_id;
+
+        IF v_cashback IS NOT NULL THEN
             UPDATE clientes_especiais
-            SET cashback = cashback + (valor_compra * 0.05)
-            WHERE cliente_id = cliente_id;
+            SET cashback = cashback + (p_valor_compra * 0.05)
+            WHERE cliente_id = p_cliente_id;
         END IF;
     END;
     """)
 
-    # Procedure: atualizar nota média do vendedor
+    # --- PROCEDURE: atualizar nota média do vendedor ---
+    cursor.execute("DROP PROCEDURE IF EXISTS atualizar_nota_vendedor;")
     cursor.execute("""
-    CREATE PROCEDURE IF NOT EXISTS atualizar_nota_vendedor(IN vendedor INT, IN nova_nota DECIMAL(3,1))
+    CREATE PROCEDURE atualizar_nota_vendedor(IN p_vendedor_id INT, IN p_nova_nota DECIMAL(3,1))
     BEGIN
-        DECLARE media DECIMAL(3,1);
-        SELECT AVG(nova_nota) INTO media;
-        UPDATE Vendedor SET nota_media = media WHERE id = vendedor;
+        DECLARE v_media DECIMAL(3,1);
+
+        SELECT ROUND(AVG(p_nova_nota),1) INTO v_media;
+
+        UPDATE Vendedor
+        SET nota_media = v_media
+        WHERE id = p_vendedor_id;
     END;
     """)
 
-    # Trigger: reduzir estoque quando ocorre uma venda
+    # --- TRIGGER: reduzir estoque após venda de produto ---
+    cursor.execute("DROP TRIGGER IF EXISTS trg_reduzir_estoque;")
     cursor.execute("""
-    CREATE TRIGGER IF NOT EXISTS trg_reduzir_estoque
+    CREATE TRIGGER trg_reduzir_estoque
     AFTER INSERT ON venda_produtos
     FOR EACH ROW
     BEGIN
@@ -41,9 +52,10 @@ def criar_procedures_e_triggers():
     END;
     """)
 
-    # Trigger: restaurar estoque se venda for removida
+    # --- TRIGGER: restaurar estoque quando venda é cancelada ---
+    cursor.execute("DROP TRIGGER IF EXISTS trg_restaurar_estoque;")
     cursor.execute("""
-    CREATE TRIGGER IF NOT EXISTS trg_restaurar_estoque
+    CREATE TRIGGER trg_restaurar_estoque
     AFTER DELETE ON venda_produtos
     FOR EACH ROW
     BEGIN
@@ -53,24 +65,33 @@ def criar_procedures_e_triggers():
     END;
     """)
 
-    # Trigger: registrar cashback automático após venda
+    # --- TRIGGER: aplicar cashback automaticamente após venda ---
+    cursor.execute("DROP TRIGGER IF EXISTS trg_cashback_venda;")
     cursor.execute("""
-    CREATE TRIGGER IF NOT EXISTS trg_cashback_venda
+    CREATE TRIGGER trg_cashback_venda
     AFTER INSERT ON Venda
     FOR EACH ROW
     BEGIN
-        CALL aplicar_cashback(NEW.cliente_id, (
-            SELECT SUM(p.valor * vp.quantidade)
-            FROM venda_produtos vp
-            JOIN Produtos p ON vp.produto_id = p.id
-            WHERE vp.venda_id = NEW.id
-        ));
+        DECLARE v_total_compra DECIMAL(10,2);
+
+        SELECT SUM(p.valor * vp.quantidade)
+        INTO v_total_compra
+        FROM venda_produtos vp
+        JOIN Produtos p ON vp.produto_id = p.id
+        WHERE vp.venda_id = NEW.id;
+
+        IF v_total_compra IS NOT NULL THEN
+            CALL aplicar_cashback(NEW.cliente_id, v_total_compra);
+        END IF;
     END;
     """)
 
-    print("✅ Procedures e Triggers criados com sucesso!")
+    conn.commit()
+    print("Procedures e Triggers criados com sucesso!")
+
     cursor.close()
     desconectar(conn)
 
-if _name_ == "_main_":
+
+if __name__ == "__main__":
     criar_procedures_e_triggers()
