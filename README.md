@@ -2,7 +2,7 @@
 Criação de uma Loja e-commerce de RPG da cadeira "Projeto de Banco de Dados" do professor Jheymesson
 Modelo conceitual
 <div align="center">
-  <img src="https://github.com/D4n1el20/ImagensProjetoAPIFinancas/blob/main/imagem_2025-11-10_182656362.png" alt="Print Issues GitHub" width="80%">
+  <img src="https://github.com/D4n1el20/ImagensProjetoAPIFinancas/blob/main/imagem_2025-11-10_183130655.png" alt="Print Issues GitHub" width="80%">
 </div>
 
 <div align="center">
