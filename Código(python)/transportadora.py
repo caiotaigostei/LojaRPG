@@ -1,82 +1,47 @@
-from db import conectar, desconectar
-
+from bd import conectar, desconectar
 
 def inserir_transportadora(nome, cidade):
     conn = conectar()
     cursor = conn.cursor()
+    sql = "INSERT INTO transportadoras (nome, cidade) VALUES (%s, %s)"
     try:
-        sql = """
-            INSERT INTO transportadoras (nome, cidade)
-            VALUES (%s, %s)
-        """
         cursor.execute(sql, (nome, cidade))
         conn.commit()
-        print("Transportadora cadastrada com sucesso!")
-    except Exception as e:
-        print("Erro ao cadastrar transportadora:", e)
-        conn.rollback()
+        return cursor.lastrowid
     finally:
         cursor.close()
         desconectar(conn)
-
 
 def listar_transportadoras():
     conn = conectar()
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT id, nome, cidade FROM transportadoras ORDER BY id")
-        transportadoras = cursor.fetchall()
-
-        if transportadoras:
-            print("\n--- Lista de Transportadoras ---")
-            for t in transportadoras:
-                print(f"ID: {t[0]} | Nome: {t[1]} | Cidade: {t[2]}")
-        else:
-            print("Nenhuma transportadora cadastrada.")
-    except Exception as e:
-        print("Erro ao listar transportadoras:", e)
+        return cursor.fetchall()
     finally:
         cursor.close()
         desconectar(conn)
 
-
-def atualizar_transportadora(id, novo_nome, nova_cidade):
+def atualizar_transportadora(transportadora_id, novo_nome, nova_cidade):
     conn = conectar()
     cursor = conn.cursor()
+    sql = "UPDATE transportadoras SET nome = %s, cidade = %s WHERE id = %s"
     try:
-        sql = """
-            UPDATE transportadoras
-            SET nome = %s, cidade = %s
-            WHERE id = %s
-        """
-        cursor.execute(sql, (novo_nome, nova_cidade, id))
+        cursor.execute(sql, (novo_nome, nova_cidade, transportadora_id))
         conn.commit()
-        if cursor.rowcount > 0:
-            print("Transportadora atualizada com sucesso!")
-        else:
-            print("Transportadora não encontrada.")
-    except Exception as e:
-        print("Erro ao atualizar transportadora:", e)
-        conn.rollback()
+        return cursor.rowcount  # retorna quantas linhas foram afetadas
     finally:
         cursor.close()
         desconectar(conn)
 
-
-def remover_transportadora(id):
+def remover_transportadora(transportadora_id):
     conn = conectar()
     cursor = conn.cursor()
+    sql = "DELETE FROM transportadoras WHERE id = %s"
     try:
-        sql = "DELETE FROM transportadoras WHERE id = %s"
-        cursor.execute(sql, (id,))
+        cursor.execute(sql, (transportadora_id,))
         conn.commit()
-        if cursor.rowcount > 0:
-            print("Transportadora removida com sucesso!")
-        else:
-            print("Transportadora não encontrada.")
-    except Exception as e:
-        print("Erro ao remover transportadora:", e)
-        conn.rollback()
+        return cursor.rowcount  # retorna quantas linhas foram removidas
     finally:
         cursor.close()
         desconectar(conn)
