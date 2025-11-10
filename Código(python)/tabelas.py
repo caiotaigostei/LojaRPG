@@ -1,15 +1,12 @@
-from db import conectar, desconectar
+from bd import conectar, desconectar
 
 def criar_tabelas():
+    conn = conectar()
+    cursor = conn.cursor()
     try:
-        conn = conectar()
-        cursor = conn.cursor()
-
-        # --- Criação do banco e uso ---
         cursor.execute("CREATE DATABASE IF NOT EXISTS Loja_RPG;")
         cursor.execute("USE Loja_RPG;")
 
-        # --- Tabela: Cliente ---
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS Cliente (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -20,7 +17,6 @@ def criar_tabelas():
         );
         """)
 
-        # --- Tabela: Clientes Especiais ---
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS clientes_especiais (
             cliente_id INT PRIMARY KEY,
@@ -31,7 +27,6 @@ def criar_tabelas():
         );
         """)
 
-        # --- Tabela: Vendedor ---
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS Vendedor (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -41,7 +36,6 @@ def criar_tabelas():
         );
         """)
 
-        # --- Tabela: Produtos ---
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS Produtos (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,7 +51,6 @@ def criar_tabelas():
         );
         """)
 
-        # --- Tabela: Transportadoras ---
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS transportadoras (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -66,7 +59,6 @@ def criar_tabelas():
         );
         """)
 
-        # --- Tabela: Venda ---
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS Venda (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -84,7 +76,6 @@ def criar_tabelas():
         );
         """)
 
-        # --- Tabela: Venda_Produtos ---
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS venda_produtos (
             venda_id INT,
@@ -101,15 +92,12 @@ def criar_tabelas():
         """)
 
         conn.commit()
-        print("Todas as tabelas foram criadas (ou já existiam).")
-
-    except Exception as e:
-        print(f"Erro ao criar tabelas: {e}")
+        return True
+    except Exception:
         conn.rollback()
-
+        return False
     finally:
-        if cursor:
-            cursor.close()
+        cursor.close()
         desconectar(conn)
 
 
