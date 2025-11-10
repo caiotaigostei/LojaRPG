@@ -6,5 +6,5 @@ Modelo conceitual
 </div>
 
 <div align="center">
-  <img src="https://github.com/caiotaigostei/LojaRPG/blob/2ac603dcfb8881f8d65f02d98b2dc96e11b493a7/Screenshot_1.png" width="80%">
+  <img src="https://github.com/caiotaigostei/LojaRPG/blob/ecbb358418f5c9c3b473910a1f50a39d45936bd9/modelo%20l%C3%B3gico.png" width="80%">
 </div>
