@@ -16,7 +16,7 @@ def criar_tabelas():
         data_nascimento DATE
     );
     """)
-
+    
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS clientes_especiais (
         cliente_id INT PRIMARY KEY,
@@ -102,7 +102,14 @@ def criar_tabelas():
             ON UPDATE CASCADE
     );
     """)
-
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS Cargo_Ativo (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario VARCHAR(100) NOT NULL,
+        cargo_nome VARCHAR(100) NOT NULL,
+        data_login DATETIME DEFAULT NOW()
+    );
+    """)
     conn.commit()
     cursor.close()
     desconectar(conn)
