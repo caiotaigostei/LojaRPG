@@ -258,6 +258,10 @@ CREATE TABLE transportadoras (
   nome VARCHAR(100) NOT NULL,
   cidade VARCHAR(100)
 );
+INSERT INTO transportadoras (nome, cidade) VALUES
+('Correios', 'São Paulo'),
+('Dragon Express', 'Curitiba'),
+('Masmorra Logistics', 'Belo Horizonte');
 
 
 CREATE TABLE Venda (
@@ -365,6 +369,24 @@ BEGIN
       SET MESSAGE_TEXT = ' Apenas o CEO pode executar AUTODESTRUIR.';
     END IF;
   END IF;
+END;
+//
+DELIMITER ;
+DELIMITER //
+CREATE TRIGGER trg_atualizar_nota_vendedor
+AFTER INSERT ON Venda
+FOR EACH ROW
+BEGIN
+  -- Atualiza automaticamente a nota média dos vendedores
+  UPDATE Vendedor v
+  JOIN (
+    SELECT p.vendedor_id, AVG(vp.quantidade * 5) AS nova_nota
+    FROM venda_produtos vp
+    JOIN Produtos p ON vp.produto_id = p.id
+    JOIN Venda ve ON vp.venda_id = ve.id
+    GROUP BY p.vendedor_id
+  ) AS notas ON v.id = notas.vendedor_id
+  SET v.nota_media = notas.nova_nota;
 END;
 //
 DELIMITER ;
