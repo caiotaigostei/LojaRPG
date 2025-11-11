@@ -1,4 +1,4 @@
-from db import conectar, desconectar
+from bd import conectar, desconectar
 
 def criar_procedures_e_triggers():
     conn = conectar()
@@ -10,9 +10,11 @@ def criar_procedures_e_triggers():
     CREATE PROCEDURE aplicar_cashback(IN p_cliente_id INT, IN p_valor_compra DECIMAL(10,2))
     BEGIN
         DECLARE v_cashback DECIMAL(10,2);
+
         SELECT cashback INTO v_cashback
         FROM clientes_especiais
         WHERE cliente_id = p_cliente_id;
+
         IF v_cashback IS NOT NULL THEN
             UPDATE clientes_especiais
             SET cashback = cashback + (p_valor_compra * 0.05)
@@ -23,12 +25,18 @@ def criar_procedures_e_triggers():
 
     cursor.execute("DROP PROCEDURE IF EXISTS atualizar_nota_vendedor;")
     cursor.execute("""
-    CREATE PROCEDURE atualizar_nota_vendedor(IN p_vendedor_id INT, IN p_nova_nota DECIMAL(3,1))
+    CREATE PROCEDURE atualizar_nota_vendedor(IN p_vendedor_id INT)
     BEGIN
         DECLARE v_media DECIMAL(3,1);
-        SELECT ROUND(AVG(p_nova_nota),1) INTO v_media;
+
+        SELECT ROUND(AVG(p.valor),1) INTO v_media
+        FROM venda_produtos vp
+        JOIN Produtos p ON vp.produto_id = p.id
+        JOIN Venda v ON vp.venda_id = v.id
+        WHERE p.vendedor_id = p_vendedor_id;
+
         UPDATE Vendedor
-        SET nota_media = v_media
+        SET nota_media = IFNULL(v_media,0)
         WHERE id = p_vendedor_id;
     END;
     """)
@@ -64,11 +72,13 @@ def criar_procedures_e_triggers():
     FOR EACH ROW
     BEGIN
         DECLARE v_total_compra DECIMAL(10,2);
+
         SELECT SUM(p.valor * vp.quantidade)
         INTO v_total_compra
         FROM venda_produtos vp
         JOIN Produtos p ON vp.produto_id = p.id
         WHERE vp.venda_id = NEW.id;
+
         IF v_total_compra IS NOT NULL THEN
             CALL aplicar_cashback(NEW.cliente_id, v_total_compra);
         END IF;
@@ -78,7 +88,6 @@ def criar_procedures_e_triggers():
     conn.commit()
     cursor.close()
     desconectar(conn)
-
 
 if __name__ == "__main__":
     criar_procedures_e_triggers()
