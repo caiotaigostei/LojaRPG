@@ -4,7 +4,6 @@ def inserir_cliente(nome, idade, sexo, data_nasc):
     conn = conectar()
     if conn:
         cursor = conn.cursor()
-        cursor.execute("SET @cargo_ativo = 'Gerente_Usuarios';")
         sql = "INSERT INTO Cliente (nome, idade, sexo, data_nascimento) VALUES (%s, %s, %s, %s)"
         valores = (nome, idade, sexo, data_nasc)
         try:
