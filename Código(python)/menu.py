@@ -4,8 +4,13 @@ import vendedor
 import transportadora
 import produto
 import vendas
-
+from cargo import definir_cargo_ativo
 def menu_clientes():
+    def main():
+    print("\n=== SISTEMA E-COMMERCE RPG ===")
+    usuario = input("Nome do usuário: ")
+    cargo = input("Cargo (CEO / Gerente_Usuarios / Vendedor): ")
+    definir_cargo_ativo(cargo, usuario)
     while True:
         print("\n--- CLIENTES ---")
         print("1) Inserir cliente")
@@ -143,3 +148,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
