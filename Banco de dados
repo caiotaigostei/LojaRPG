@@ -1,6 +1,7 @@
 CREATE DATABASE Loja_RPG;
 USE Loja_RPG;
 
+
 CREATE TABLE Cliente (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
@@ -9,6 +10,7 @@ CREATE TABLE Cliente (
   data_nascimento DATE,
   CONSTRAINT unq_nome_data UNIQUE (nome, data_nascimento)
 );
+
 INSERT INTO Cliente (nome, idade, sexo, data_nascimento) VALUES
 ('Ana Beatriz Moreira', 23, 'F', '2002-05-14'),
 ('Carlos Eduardo Lima', 31, 'M', '1994-09-23'),
@@ -116,6 +118,7 @@ CREATE TABLE clientes_especiais (
   cashback DECIMAL(10,2) DEFAULT 0.00,
   FOREIGN KEY (cliente_id) REFERENCES Cliente(id)
 );
+
 INSERT INTO clientes_especiais (cliente_id, cashback) VALUES
 (1, 45.50),
 (2, 32.00),
@@ -190,6 +193,19 @@ INSERT INTO Cargo (nome, descricao) VALUES
 ('Vendedor', 'Pode vender produtos normais.'),
 ('Vendedor_VIP', 'Pode vender produtos premium e tem nota média mais alta.');
 
+
+CREATE TABLE Cargo_Ativo (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario VARCHAR(100) NOT NULL UNIQUE,
+  cargo_nome ENUM('CEO','Gerente_Produtos','Gerente_Usuarios','Vendedor','Vendedor_VIP') NOT NULL,
+  data_login DATETIME DEFAULT NOW()
+);
+
+-- Usuário padrão ativo (exemplo)
+INSERT INTO Cargo_Ativo (usuario, cargo_nome)
+VALUES ('admin', 'Vendedor');
+
+
 CREATE TABLE Vendedor (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
@@ -200,7 +216,7 @@ CREATE TABLE Vendedor (
   FOREIGN KEY (cargo_id) REFERENCES Cargo(id)
 );
 
--- Inserindo vendedores de exemplo
+-- (inserções mantidas)
 INSERT INTO Vendedor (nome, causa_social, nota_media, tipo, cargo_id) VALUES
 ('Lucas Ramos', 'Loja dos Aventureiros', 4.3, 'comum', 4),
 ('Carla Farias', 'Masmorra Encantada', 4.5, 'comum', 4),
@@ -219,8 +235,6 @@ CREATE TABLE Produtos (
   vendedor_id INT,
   FOREIGN KEY (vendedor_id) REFERENCES Vendedor(id)
 );
-
-
 INSERT INTO Produtos (nome, descricao, quantidade_em_estoque, valor, observacoes, vendedor_id) VALUES
 ('Conjunto de Dados Metálicos', 'Conjunto com 7 dados metálicos de RPG.', 15, 149.90, 'Brilho prateado; inclui bolsa.', 1),
 ('Escudo do Mestre', 'Painel de papelão com tabelas e arte temática.', 10, 89.90, 'Versão genérica, compatível com qualquer sistema.', 1),
@@ -243,7 +257,6 @@ INSERT INTO Produtos (nome, descricao, quantidade_em_estoque, valor, observacoes
 ('Dado Gigante d20', 'Dado de 10 cm de diâmetro para eventos.', 15, 49.90, 'Material: acrílico.', 2),
 ('Livro do Jogador Avançado', 'Manual expandido com regras e classes novas.', 9, 189.90, 'Edição de luxo.', 1);
 
-
 INSERT INTO Produtos (nome, descricao, quantidade_em_estoque, valor, observacoes, vendedor_id) VALUES
 ('Relíquia do Dragão Ancião', 'Item lendário usado em campanhas épicas.', 2, 799.90, 'Somente disponível para jogadores experientes.', 4),
 ('Dado de Cristal Arcano', 'Dado artesanal feito de cristal lapidado.', 3, 999.90, 'Acompanha certificado de autenticidade.', 4),
@@ -251,12 +264,12 @@ INSERT INTO Produtos (nome, descricao, quantidade_em_estoque, valor, observacoes
 ('Espada Cerimonial do Abismo', 'Réplica de arma lendária de RPG.', 2, 899.90, 'Feita sob encomenda.', 5),
 ('Coleção Lendária – Set Completo', 'Caixa com todos os livros premium da loja.', 1, 1499.90, 'Produto exclusivo VIP.', 5);
 
-
 CREATE TABLE transportadoras (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   cidade VARCHAR(100)
 );
+
 INSERT INTO transportadoras (nome, cidade) VALUES
 ('Correios', 'São Paulo'),
 ('Dragon Express', 'Curitiba'),
@@ -290,8 +303,6 @@ CREATE TABLE sistema_controle (
   data_execucao DATETIME DEFAULT NOW()
 );
 
-SET @cargo_ativo = 'Vendedor';
-
 
 
 DELIMITER //
@@ -299,9 +310,12 @@ CREATE TRIGGER trg_bloquear_criacao_produtos
 BEFORE INSERT ON Produtos
 FOR EACH ROW
 BEGIN
-  IF @cargo_ativo NOT IN ('Gerente_Produtos', 'CEO') THEN
+  DECLARE cargo_usuario VARCHAR(50);
+  SELECT cargo_nome INTO cargo_usuario FROM Cargo_Ativo WHERE usuario = 'admin' LIMIT 1;
+
+  IF cargo_usuario NOT IN ('Gerente_Produtos', 'CEO') THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = ' Apenas o Gerente de Produtos ou CEO pode criar produtos.';
+    SET MESSAGE_TEXT = 'Apenas o Gerente de Produtos ou CEO pode criar produtos.';
   END IF;
 END;
 //
@@ -312,9 +326,12 @@ CREATE TRIGGER trg_bloquear_exclusao_produtos
 BEFORE DELETE ON Produtos
 FOR EACH ROW
 BEGIN
-  IF @cargo_ativo NOT IN ('Gerente_Produtos', 'CEO') THEN
+  DECLARE cargo_usuario VARCHAR(50);
+  SELECT cargo_nome INTO cargo_usuario FROM Cargo_Ativo WHERE usuario = 'admin' LIMIT 1;
+
+  IF cargo_usuario NOT IN ('Gerente_Produtos', 'CEO') THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = ' Apenas o Gerente de Produtos ou CEO pode excluir produtos.';
+    SET MESSAGE_TEXT = 'Apenas o Gerente de Produtos ou CEO pode excluir produtos.';
   END IF;
 END;
 //
@@ -325,9 +342,12 @@ CREATE TRIGGER trg_bloquear_exclusao_clientes
 BEFORE DELETE ON Cliente
 FOR EACH ROW
 BEGIN
-  IF @cargo_ativo NOT IN ('Gerente_Usuarios', 'CEO') THEN
+  DECLARE cargo_usuario VARCHAR(50);
+  SELECT cargo_nome INTO cargo_usuario FROM Cargo_Ativo WHERE usuario = 'admin' LIMIT 1;
+
+  IF cargo_usuario NOT IN ('Gerente_Usuarios', 'CEO') THEN
     SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = ' Apenas o Gerente de Usuários ou CEO pode excluir clientes.';
+    SET MESSAGE_TEXT = 'Apenas o Gerente de Usuários ou CEO pode excluir clientes.';
   END IF;
 END;
 //
@@ -338,7 +358,10 @@ CREATE TRIGGER trg_bloquear_alteracao_cashback
 BEFORE UPDATE ON clientes_especiais
 FOR EACH ROW
 BEGIN
-  IF @cargo_ativo NOT IN ('Gerente_Usuarios', 'CEO') THEN
+  DECLARE cargo_usuario VARCHAR(50);
+  SELECT cargo_nome INTO cargo_usuario FROM Cargo_Ativo WHERE usuario = 'admin' LIMIT 1;
+
+  IF cargo_usuario NOT IN ('Gerente_Usuarios', 'CEO') THEN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Apenas o Gerente de Usuários ou CEO pode alterar cashback.';
   END IF;
@@ -351,8 +374,11 @@ CREATE TRIGGER trg_autodestruicao_ceo
 AFTER INSERT ON sistema_controle
 FOR EACH ROW
 BEGIN
+  DECLARE cargo_usuario VARCHAR(50);
+  SELECT cargo_nome INTO cargo_usuario FROM Cargo_Ativo WHERE usuario = 'admin' LIMIT 1;
+
   IF NEW.comando = 'AUTODESTRUIR' THEN
-    IF @cargo_ativo = 'CEO' THEN
+    IF cargo_usuario = 'CEO' THEN
       DELETE FROM venda_produtos;
       DELETE FROM Venda;
       DELETE FROM Produtos;
@@ -361,16 +387,16 @@ BEGIN
       DELETE FROM Vendedor;
       DELETE FROM transportadoras;
       DELETE FROM Cargo;
-
       INSERT INTO sistema_controle (comando) VALUES ('BANCO_AUTODESTRUIDO');
     ELSE
       SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = ' Apenas o CEO pode executar AUTODESTRUIR.';
+      SET MESSAGE_TEXT = 'Apenas o CEO pode executar AUTODESTRUIR.';
     END IF;
   END IF;
 END;
 //
 DELIMITER ;
+
 DELIMITER //
 CREATE TRIGGER trg_atualizar_nota_vendedor
 AFTER INSERT ON Venda
