@@ -84,6 +84,21 @@ def criar_procedures_e_triggers():
         END IF;
     END;
     """)
+        cursor.execute("DROP TRIGGER IF EXISTS trg_validar_permissoes;")
+    cursor.execute("""
+    CREATE TRIGGER trg_validar_permissoes
+    BEFORE UPDATE ON clientes_especiais
+    FOR EACH ROW
+    BEGIN
+        DECLARE v_cargo VARCHAR(100);
+        SELECT cargo_nome INTO v_cargo FROM Cargo_Ativo ORDER BY data_login DESC LIMIT 1;
+
+        IF v_cargo NOT IN ('Gerente_Usuarios', 'CEO') THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Permissão negada: apenas Gerente_Usuarios ou CEO podem alterar cashback.';
+        END IF;
+    END;
+    """)
 
     conn.commit()
     cursor.close()
